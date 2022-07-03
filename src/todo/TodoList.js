@@ -1,11 +1,21 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import TodoForm from './TodoForm';
 import TodoItem from './TodoItem';
+import {useLocalStorage} from '../CustomHook/useLocalStorage';
 
 
 function TodoList() {
 
 	const [todos, setTodos] = useState([]);
+	const [todoList, setTodoList] = useLocalStorage();
+
+	useEffect(() => {
+		setTodos(todoList);
+	},[]);
+
+	useEffect(() => {
+		setTodoList(todos);
+	},[todos]);
 
 	const handleSubmit = (e) => {
 
@@ -30,10 +40,20 @@ function TodoList() {
 
 		let updatedTodoList = todos;
 		updatedTodoList.forEach((todo) => {
-			console.log(todo);
 			if(todo.id == id){
-				console.log(todo.text);
 				todo.isEditing = true;
+			}
+		})
+
+		setTodos([...updatedTodoList]);
+	}
+
+	const cancelUpdateTodo = (id) => {
+
+		let updatedTodoList = todos;
+		updatedTodoList.forEach((todo) => {
+			if(todo.id == id){
+				todo.isEditing = false;
 			}
 		})
 
@@ -48,8 +68,21 @@ function TodoList() {
 	}
 
 	const updateTodoSequence = (todoList) => {
-		console.log('USAUDOASJ');
 		setTodos([...todoList]);
+	}
+
+	const finishEditTodo = (todoId, todoText) => {
+		todos.forEach((todo) => {
+			if(todo.id == todoId){
+
+				if(todo.text != todoText){
+					todo.text = todoText;
+				}
+				todo.isEditing = false;
+			}
+		})
+
+		setTodos([...todos]);
 	}
 
 	return (
@@ -57,7 +90,13 @@ function TodoList() {
 		<div>
 			<TodoForm onSub={handleSubmit}/>
 			<div>
-				<TodoItem todos={todos} completeTodo={completeTodo} removeTodo={removeTodo} editTodo={updateTodo} updateTodoSequence={updateTodoSequence}/>
+				<TodoItem todos={todos}
+					completeTodo={completeTodo}
+					removeTodo={removeTodo}
+					editTodo={updateTodo}
+					cancelEditTodo={cancelUpdateTodo}
+					finishEditTodo={finishEditTodo}
+					updateTodoSequence={updateTodoSequence}/>
 			</div>
 		</div>
 
